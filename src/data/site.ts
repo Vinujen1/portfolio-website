@@ -5,8 +5,10 @@ export const site = {
   headline: "Software engineer building systems that see, understand and act.",
   intro:
     "I'm a Software Engineering student at Ontario Tech University focused on AI engineering: taking models from training and evaluation to systems people can rely on, from a vision-language-action excavator to semantic search. I'm looking for new graduate software engineering roles starting in 2027.",
+  // Search result title and snippet. Keep the description under ~160 characters so Google doesn't truncate it.
+  title: "Vinujen Dilogen | Software Engineer & AI Developer",
   description:
-    "Vinujen Dilogen is a Software Engineering student at Ontario Tech University (graduating 2027) focused on AI engineering: machine learning, computer vision and the software around them. Projects, experience and résumé.",
+    "Vinujen Dilogen is a Software Engineering student at Ontario Tech University building AI, computer vision and full-stack systems. Projects, experience, résumé.",
   location: "Greater Toronto Area, Ontario",
   email: "vinujen200444@gmail.com",
   graduation: "May 2027",

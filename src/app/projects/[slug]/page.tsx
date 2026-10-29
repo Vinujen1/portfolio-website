@@ -7,7 +7,10 @@ import { ProgressMark, StatusBadge, progressLabel } from "@/components/ui/Status
 import { SystemDiagram } from "@/components/ui/SystemDiagram";
 import { TagList } from "@/components/ui/Tag";
 import { getProject, projects } from "@/data/projects";
+import { site } from "@/data/site";
 import type { ReactNode } from "react";
+
+const previewImage = { url: "/opengraph-image", width: 1200, height: 630, alt: site.title };
 
 export function generateStaticParams() {
   return projects.map((project) => ({ slug: project.slug }));
@@ -21,7 +24,15 @@ export async function generateMetadata({ params }: PageProps<"/projects/[slug]">
     title: project.title,
     description: project.summary,
     alternates: { canonical: `/projects/${project.slug}` },
-    openGraph: { title: project.title, description: project.summary, url: `/projects/${project.slug}` },
+    // Setting openGraph here replaces the root one, so the shared preview image has to be restated.
+    openGraph: {
+      type: "article",
+      title: project.title,
+      description: project.summary,
+      url: `/projects/${project.slug}`,
+      images: [previewImage],
+    },
+    twitter: { card: "summary_large_image", title: project.title, description: project.summary, images: [previewImage] },
   };
 }
 
