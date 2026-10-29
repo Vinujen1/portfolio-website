@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# browser test artefacts
+/.playwright-mcp
+/test-results
+/playwright-report
+
+.vercel
+.env*

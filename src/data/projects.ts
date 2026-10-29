@@ -1,0 +1,280 @@
+import type { Project } from "@/types/content";
+
+export const projects: Project[] = [
+  {
+    slug: "excavator-vla",
+    title: "Vision-Language-Action Excavator",
+    tagline: "Telling a machine what to dig — and making sure it can say no.",
+    summary:
+      "A capstone hardware-software system exploring how spoken commands, computer vision and task planning can drive semi-autonomous excavator operations on a scale model, with a deterministic safety layer between every plan and the motors.",
+    period: "Sept 2026 – Present",
+    context: "Engineering capstone, Ontario Tech University · supervised by Dr. Jaho Seo",
+    status: "in-development",
+    role: "AI & VLA development (shared with one teammate) on a five-person team — model deployment and language processing.",
+    stack: [
+      "Python",
+      "PyTorch",
+      "OpenCV",
+      "YOLO",
+      "Whisper",
+      "LangChain",
+      "LLM APIs",
+      "ROS 2",
+      "FastAPI",
+      "NVIDIA Jetson",
+      "Raspberry Pi",
+      "Intel RealSense D435i",
+      "Arduino",
+    ],
+    problem:
+      "Excavator operation is skilled, repetitive and unforgiving. An operator can describe a task in a sentence — “dig a trench near the red marker” — but turning that sentence into safe joint motion needs perception, language understanding, planning and hard limits that all agree with each other.",
+    motivation:
+      "Vision-language-action models are moving fast in research, but most demos skip the part that matters on a worksite: what happens when the model is wrong. We wanted a system where every stage is inspectable and a dumb, readable safety gate always has the last word.",
+    approach: [
+      "Split the pipeline into explicit stages — input, language, vision, world state, planning, safety, motion, hardware — so a failure can be traced to one stage instead of an end-to-end black box.",
+      "Language produces symbols, never coordinates. The parser outputs a structured task such as target “red_marker”; only the world model knows where that is in metres. When the machine digs in the wrong place, the JSON shows whether language or vision was at fault.",
+      "Vision runs every frame and never waits on the language model, so the system is not blinded at the moment a command is issued.",
+      "A deterministic safety layer can only veto: ALLOW, SLOW, CONFIRM or HALT. A person in the workspace is checked before geofence limits, which are checked before machine limits.",
+      "Planned hardware split: NVIDIA Jetson runs vision, speech and planning; a Raspberry Pi hosts a FastAPI hardware server that checks limits, sensor freshness, heartbeats and command expiry before driving motors, with an independent emergency stop that cuts motor power.",
+    ],
+    contributions: [
+      "Co-own the AI and VLA workstream: model deployment and language processing.",
+      "Developing modular backend software in Python with PyTorch, OpenCV, ROS 2 and LangChain.",
+      "Contributed to the software pipeline architecture shared with the electrical, sensor and mechanical sub-teams.",
+    ],
+    challenges: [
+      {
+        title: "Depth from a single camera",
+        body: "The webcam prototype recovers distance with a flat-ground assumption: each pixel becomes a ray that hits a ground plane at a known camera height and tilt. It works, but error grows as the ground is dug away — the reason the RealSense depth camera is in the hardware plan.",
+      },
+      {
+        title: "Speech on a loud site",
+        body: "Whisper heard “slew” as “slow” — also a valid command, so the failure is silent. The prototype primes Whisper with excavator vocabulary, calibrates the noise floor at startup and uses push-to-talk instead of always-on listening.",
+      },
+      {
+        title: "Making safety arguable",
+        body: "You can write a safety case about sixty lines of explicit thresholds; you can't write one about a neural network. Keeping the safety layer deliberately non-intelligent was a design decision, not a shortcut.",
+      },
+    ],
+    progress: [
+      { label: "Text and push-to-talk voice input (Whisper)", state: "done", note: "Webcam prototype" },
+      { label: "Language parsing with LLM and offline rule fallback", state: "done", note: "Webcam prototype" },
+      { label: "Vision: colour markers and YOLOv8n, projected to metres", state: "done", note: "Webcam prototype" },
+      { label: "World state with smoothing and object permanence", state: "done", note: "Webcam prototype" },
+      { label: "Task planner with excavator primitives", state: "done", note: "Webcam prototype" },
+      { label: "Deterministic safety veto chain", state: "done", note: "Webcam prototype, 29 automated checks" },
+      { label: "Sensor fusion (IMU, potentiometers, encoders)", state: "planned" },
+      { label: "Motion control, inverse kinematics and hardware server", state: "planned" },
+      { label: "Integration on the scale excavator and field evaluation", state: "planned" },
+    ],
+    highlights: [
+      { value: "6 of 9", label: "pipeline stages running in the webcam prototype" },
+      { value: "29", label: "automated pipeline checks" },
+      { value: "13 ms", label: "marker detection per frame on a laptop CPU" },
+    ],
+    lessons: [
+      "Decoupling perception from language is what keeps a robot responsive — the slow model should never be on the critical path.",
+      "Domain priming is the cheapest accuracy win in speech recognition.",
+      "Structured intermediate outputs make an AI system debuggable by people who didn't build it.",
+    ],
+    next: [
+      "Mount the RealSense D435i and replace the flat-ground estimate with measured depth.",
+      "Bring up the Raspberry Pi hardware server with command limits, heartbeat and expiry.",
+      "Close the loop with joint sensors and evaluate task success on the scale model under supervision.",
+    ],
+    links: [],
+    diagram: {
+      title: "Planned system pipeline",
+      caption: "Architecture diagram, not a screenshot. Solid stages run in the webcam prototype; dashed stages need the hardware.",
+      cols: 5,
+      rows: 3,
+      nodes: [
+        { id: "cmd", label: "Voice / text", detail: "Operator command", col: 0, row: 0, state: "done" },
+        { id: "lang", label: "Language", detail: "Whisper + LLM parser", col: 1, row: 0, state: "done" },
+        { id: "cam", label: "Camera", detail: "Webcam → RealSense", col: 0, row: 1, state: "partial" },
+        { id: "vision", label: "Vision", detail: "YOLO + markers", col: 1, row: 1, state: "done" },
+        { id: "world", label: "World state", detail: "Targets in metres", col: 2, row: 1, state: "done" },
+        { id: "sensors", label: "Joint sensors", detail: "IMU, pots, encoders", col: 2, row: 2, state: "planned" },
+        { id: "plan", label: "Task planner", detail: "Excavator primitives", col: 3, row: 1, state: "done" },
+        { id: "safety", label: "Safety gate", detail: "Veto chain", col: 4, row: 1, state: "done" },
+        { id: "estop", label: "E-stop", detail: "Independent cut-off", col: 3, row: 2, state: "planned" },
+        { id: "motion", label: "Motion", detail: "Pi server + motors", col: 4, row: 2, state: "planned" },
+      ],
+      edges: [
+        { from: "cmd", to: "lang" },
+        { from: "lang", to: "plan" },
+        { from: "cam", to: "vision" },
+        { from: "vision", to: "world" },
+        { from: "sensors", to: "world" },
+        { from: "world", to: "plan" },
+        { from: "plan", to: "safety" },
+        { from: "safety", to: "motion" },
+        { from: "estop", to: "motion" },
+      ],
+    },
+    sources: ["Capstone overview deck", "Software pipeline diagram (Oct 2026)", "Webcam prototype README and source", "Résumé"],
+  },
+  {
+    slug: "recalliq",
+    title: "RecallIQ",
+    tagline: "Find the recall that matches what actually happened.",
+    summary:
+      "An academic deep learning project to retrieve Canadian product recall notices from plain-language descriptions, using fine-tuned sentence transformers and retrieval-augmented generation. It is in the planning stage; everything below describes the intended design.",
+    period: "Fall 2026",
+    context: "Academic AI project, Ontario Tech University",
+    status: "planned",
+    role: "Project design, model training and evaluation plan.",
+    stack: ["Python", "PyTorch", "Sentence Transformers", "Embeddings", "Semantic search", "RAG"],
+    problem:
+      "Recall notices are written by regulators, not by the people affected. Someone searching “my kid's stroller wheel snapped off” won't type the product's model number or the hazard category, so keyword search misses notices that describe exactly their problem.",
+    motivation:
+      "This is a retrieval problem where getting the top result wrong has a real cost. It's a good test of whether domain fine-tuning measurably beats an off-the-shelf embedding model.",
+    approach: [
+      "Build a corpus from publicly available Canadian recall notices and a set of natural-language test queries with known matching notices.",
+      "Establish baselines first: keyword search and a pretrained sentence-transformer.",
+      "Fine-tune the embedding model with a contrastive objective, using hard-negative mining so the model learns to separate near-identical products with different hazards.",
+      "Add a generation step that answers only from retrieved notices and cites them, so the answer can always be checked against the source.",
+      "Evaluate retrieval with standard ranking metrics against the baselines, on queries held out from training.",
+    ],
+    contributions: ["Defined the problem, data plan, model approach and evaluation protocol."],
+    challenges: [
+      {
+        title: "Hard negatives are the whole game",
+        body: "Two strollers from the same brand can have different hazards. Random negatives are too easy; mining confusable negatives is what forces the model to learn the distinctions that matter.",
+      },
+      {
+        title: "Keeping evaluation honest",
+        body: "Queries used for evaluation must stay out of fine-tuning, or the improvement over baseline is meaningless.",
+      },
+    ],
+    progress: [
+      { label: "Problem definition and evaluation plan", state: "done" },
+      { label: "Recall notice corpus and labelled queries", state: "planned" },
+      { label: "Keyword and pretrained-embedding baselines", state: "planned" },
+      { label: "Contrastive fine-tuning with hard negatives", state: "planned" },
+      { label: "Retrieval-augmented answers with citations", state: "planned" },
+      { label: "Evaluation against baselines", state: "planned" },
+    ],
+    lessons: ["Results will be added here once the experiments are complete."],
+    next: ["Assemble the corpus and query set, then run the baselines before any fine-tuning."],
+    links: [],
+    diagram: {
+      title: "Planned retrieval architecture",
+      caption: "Design diagram for planned work. Nothing shown here is implemented yet.",
+      cols: 5,
+      rows: 2,
+      nodes: [
+        { id: "notices", label: "Recall notices", detail: "Public Canadian data", col: 0, row: 0, state: "planned" },
+        { id: "prep", label: "Clean & chunk", col: 1, row: 0, state: "planned" },
+        { id: "embed", label: "Fine-tuned encoder", detail: "Contrastive + hard negatives", col: 2, row: 0, state: "planned" },
+        { id: "index", label: "Vector index", col: 3, row: 0, state: "planned" },
+        { id: "query", label: "User description", detail: "Plain language", col: 0, row: 1, state: "planned" },
+        { id: "qembed", label: "Query embedding", col: 2, row: 1, state: "planned" },
+        { id: "topk", label: "Top-k retrieval", col: 3, row: 1, state: "planned" },
+        { id: "answer", label: "Grounded answer", detail: "Cites notices", col: 4, row: 1, state: "planned" },
+      ],
+      edges: [
+        { from: "notices", to: "prep" },
+        { from: "prep", to: "embed" },
+        { from: "embed", to: "index" },
+        { from: "query", to: "qembed" },
+        { from: "qembed", to: "topk" },
+        { from: "index", to: "topk" },
+        { from: "topk", to: "answer" },
+      ],
+    },
+    sources: ["Project brief provided by Vinujen"],
+  },
+  {
+    slug: "transit-platform",
+    title: "EasyTransit",
+    tagline: "A transit companion for Markham that's honest about the bus.",
+    summary:
+      "A hackathon prototype for York Region riders: plan a trip, compare bus, walking, cycling and driving, see live YRT buses and arrivals, and get a clear alternative when your bus is late — with modes for riders who need easier access.",
+    period: "Oct 2026",
+    context: "GDG Markham Build & Connect Hackathon · team project",
+    status: "hackathon",
+    role: "Built the TransitIQ app features for accessibility, reporting and notifications.",
+    stack: ["TypeScript", "Next.js", "Tailwind CSS", "FastAPI", "Pydantic", "SQLite", "GTFS / GTFS-Realtime", "Google Maps APIs", "Gemini / OpenAI"],
+    problem:
+      "Transit apps tell you when the bus is scheduled; riders need to know when it will actually arrive, what to do when it doesn't, and whether the route works for them if stairs, long walks or icy sidewalks are a problem.",
+    motivation:
+      "The hackathon's mobility track asked how to make daily travel around Markham safer, easier and more efficient. Reliability and accessibility were the two problems we heard most about.",
+    approach: [
+      "Load YRT's public GTFS schedule into a SQLite index and poll GTFS-Realtime feeds for live vehicles, trip updates and alerts.",
+      "Merge scheduled and live data, labelling arrivals Live only when a real-time prediction exists and hiding live data older than three minutes.",
+      "Rank journey options in “equivalent minutes”: travel time plus transfer and walking penalties weighted by the rider's chosen priority.",
+      "Let an LLM explain routes the backend computed — it cannot create routes, times or fares, and explanation IDs are checked against real results.",
+      "Without API keys the app still runs, with clearly labelled demo routes and a simulation mode whose incidents are always tagged SIMULATED.",
+    ],
+    contributions: [
+      "Built the TransitIQ app with accessibility features, RoadWatch community reporting and notifications.",
+      "Added senior mode, missed-bus recovery, live line delays and icy-sidewalk reports.",
+      "Added a graceful fallback to a schematic map when the Maps key is rejected.",
+    ],
+    challenges: [
+      {
+        title: "Never overstating live data",
+        body: "A stale prediction shown as live is worse than a schedule. Freshness checks decide what earns the Live label.",
+      },
+      {
+        title: "Accessibility you can actually verify",
+        body: "Step-free access isn't verified per route in the data, so the app says so rather than promising it, and shows YRT's per-stop accessible-boarding flag where available.",
+      },
+    ],
+    progress: [
+      { label: "Live YRT stops, arrivals, vehicles and alerts", state: "done" },
+      { label: "Preference-based route ranking", state: "done" },
+      { label: "Accessibility modes, simple directions, read aloud", state: "done" },
+      { label: "RoadWatch reports and notifications", state: "done" },
+      { label: "Real directions", state: "partial", note: "Requires a Google Maps key; labelled demo routes otherwise" },
+    ],
+    lessons: [
+      "In a hackathon build, labelling what's real versus demo up front saves the presentation.",
+      "Deterministic ranking with an LLM explaining it is easier to trust than an LLM deciding.",
+    ],
+    next: ["Verify step-free access per route with richer accessibility data.", "Field-test with riders who rely on accessible transit."],
+    links: [],
+    diagram: {
+      title: "Prototype architecture",
+      caption: "Architecture diagram drawn from the project's README, not a screenshot.",
+      cols: 4,
+      rows: 3,
+      nodes: [
+        { id: "gtfs", label: "YRT GTFS", detail: "Schedule", col: 0, row: 0, state: "done" },
+        { id: "rt", label: "GTFS-Realtime", detail: "Vehicles, alerts", col: 0, row: 1, state: "done" },
+        { id: "google", label: "Google Routes", detail: "Optional key", col: 0, row: 2, state: "partial" },
+        { id: "index", label: "SQLite index", col: 1, row: 0, state: "done" },
+        { id: "merge", label: "Live + scheduled", detail: "Freshness checks", col: 1, row: 1, state: "done" },
+        { id: "planner", label: "Journey planner", col: 1, row: 2, state: "done" },
+        { id: "rank", label: "Ranking", detail: "By rider priority", col: 2, row: 1, state: "done" },
+        { id: "ai", label: "AI explanation", detail: "Explains, never decides", col: 3, row: 0, state: "done" },
+        { id: "app", label: "Next.js app", detail: "Accessibility modes", col: 3, row: 1, state: "done" },
+        { id: "roadwatch", label: "RoadWatch", detail: "Reports + alerts", col: 3, row: 2, state: "done" },
+      ],
+      edges: [
+        { from: "gtfs", to: "index" },
+        { from: "index", to: "merge" },
+        { from: "rt", to: "merge" },
+        { from: "google", to: "planner" },
+        { from: "merge", to: "rank" },
+        { from: "planner", to: "rank" },
+        { from: "rank", to: "app" },
+        { from: "rank", to: "ai" },
+        { from: "roadwatch", to: "app" },
+      ],
+    },
+    sources: ["EasyTransit README", "Git history of the team repository (Oct 24, 2026)", "Hackathon challenge brief"],
+  },
+];
+
+export function getProject(slug: string) {
+  return projects.find((project) => project.slug === slug);
+}
+
+export const statusLabel: Record<Project["status"], string> = {
+  "in-development": "In development",
+  planned: "Planned",
+  completed: "Completed",
+  hackathon: "Hackathon prototype",
+};

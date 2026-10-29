@@ -1,0 +1,5 @@
+# Never upload local secrets or test artefacts
+.env*
+.playwright-mcp
+test-results
+playwright-report
